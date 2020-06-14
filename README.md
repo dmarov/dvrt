@@ -19,3 +19,12 @@ run netcat to see sent packages, there should be service to send modified packag
 ```
 nc -l -u -p 10001
 ```
+
+
+.\ssfd.exe -p 10003 -g
+nc -l -u -p 10001
+
+x::
+{
+    Run %ComSpec% /c "node.exe C:\Users\mds3d\bin\ssf-win-x86_64-3.0.0\lagswitch.js 60231", "C:\Users\mds3d\bin\ssf-win-x86_64-3.0.0", Hide
+}
