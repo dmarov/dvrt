@@ -16,12 +16,20 @@
 
 #include <iostream>
 
-static bool onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie)
+static bool onPacketArrivesBlockingMode(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie)
 {
     pcpp::Packet parsedPacket(packet);
 
-    std::cout<< parsedPacket.toString() <<std::endl;
-    return true;
+
+    pcpp::IPv4Layer* ipLayer = parsedPacket.getLayerOfType<pcpp::IPv4Layer>();
+    /* ethLayer->setDestMac(pcpp::MacAddress("aa:bb:cc:dd:ee:ff")); */
+    /* ethLayer->setSourceMac(pcpp::MacAddress("aa:bb:cc:dd:ee:ff")); */
+    ipLayer->setSrcIpAddress(pcpp::IPv4Address("0.0.0.0"));
+    ipLayer->setDstIpAddress(pcpp::IPv4Address("0.0.0.0"));
+    parsedPacket.computeCalculateFields();
+
+    std::cout << parsedPacket.toString() << std::endl;
+    return false;
 }
 
 int main(int argc, char* argv[])
@@ -65,48 +73,10 @@ int main(int argc, char* argv[])
     pcpp::ProtoFilter protocolFilter(pcpp::UDP);
     pcpp::AndFilter andFilter;
 
-    andFilter.addFilter(&portFilter);
-    andFilter.addFilter(&protocolFilter);
-    andFilter.addFilter(&ipFilter);
+    /* andFilter.addFilter(&protocolFilter); */
+    /* andFilter.addFilter(&portFilter); */
+    /* andFilter.addFilter(&ipFilter); */
 
     /* dev->setFilter(protocolFilter); */
-    dev->startCaptureBlockingMode(onPacketArrives, (void*)0, 10);
-    //////////////// toying with device ////////////////////////////////////////////
-
-
-
-    PCAP_SLEEP(20);
-
-
-
-    /* // use the IFileReaderDevice interface to automatically identify file type (pcap/pcap-ng) */
-    /* // and create an interface instance that both readers implement */
-    /* pcpp::IFileReaderDevice* reader = pcpp::IFileReaderDevice::getReader("dbd1.pcap"); */
-    /* pcpp::PcapFileWriterDevice writer("dbd1-modified.pcap"); */
-
-    /* // verify that a reader interface was indeed created */
-    /* if (reader == NULL) */
-    /* { */
-    /*     printf("Cannot determine reader for file type\n"); */
-    /*     exit(1); */
-    /* } */
-
-    /* reader->open(); */
-    /* writer.open(); */
-
-    /* pcpp::RawPacket rawPacket; */
-
-    /* while(reader->getNextPacket(rawPacket)) { */
-
-    /*     pcpp::Packet parsedPacket(&rawPacket); */
-
-    /*     pcpp::UdpLayer* udpLayer = parsedPacket.getLayerOfType<pcpp::UdpLayer>(); */
-
-    /*     parsedPacket.computeCalculateFields(); */
-
-    /*     writer.writePacket(*(parsedPacket.getRawPacket())); */
-    /* } */
-
-    /* reader->close(); */
-    /* writer.close(); */
+    dev->startCaptureBlockingMode(onPacketArrivesBlockingMode, (void*)0, 100);
 }
